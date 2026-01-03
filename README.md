@@ -1,12 +1,12 @@
 # SNAP: Adapting LLMs for Credit Risk Assessment via Self-Attentive Numerical Alignment and Projection
 ## Scripts
-python methods.machine_learning.model
-python methods.tabllm.model
-python trainer.py --experiment_name calm
-python trainer.py --experiment_name snap
-python trainer.py --experiment_name snap --use_numerical_embedding
-python trainer.py --experiment_name snap --use_multi_head_self_attn
-python trainer.py --experiment_name snap --use_numerical_projector
+nohup python methods.machine_learning.model &
+nohup python methods.tabllm.model &
+nohup python trainer.py --experiment_name calm &
+nohup python trainer.py --experiment_name snap &
+nohup python trainer.py --experiment_name snap --use_numerical_embedding &
+nohup python trainer.py --experiment_name snap --use_multi_head_self_attn &
+nohup python trainer.py --experiment_name snap --use_numerical_projector &
 ## Evaluation Setups
 Area Under the Curve, Kolmogorov–Smirnov
 ## Research Questions
