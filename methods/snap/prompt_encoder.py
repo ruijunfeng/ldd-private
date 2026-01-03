@@ -50,10 +50,11 @@ class NumericalEmbedding(nn.Module):
 class PromptEmbeddings(nn.Module):
     def __init__(self, num_features, embed_dim):
         super().__init__()
-        self.prompt_embeddings = nn.Embedding(num_features, embed_dim).weights
+        self.prompt_embeddings = nn.Embedding(num_features, embed_dim).weight
     
     def forward(self, x):
-        return self.prompt_embeddings
+        # Expand based on batch size
+        return self.prompt_embeddings.expand(x.shape[0], -1, -1)
 
 
 class MultiHeadSelfAttention(nn.Module):
