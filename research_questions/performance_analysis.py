@@ -16,8 +16,8 @@ results = []
 
 # Machine Learning Models
 model_names = [
-    "KNN", "MLP", "DecisionTree", "LogisticRegression", "SVM", 
-    "NaiveBayes", "RandomForest", "GradientBoosting", "XGBoost"
+    "KNN", "MLP", "LogisticRegression", "SVM", "NaiveBayes", "DecisionTree", 
+    "RandomForest", "GradientBoosting", "XGBoost", "LightGBM",
 ]
 for name in model_names:
     model_results = load_json(f"results/machine_learning/{name}/predictions.json")

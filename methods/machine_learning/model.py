@@ -4,11 +4,12 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neural_network import MLPClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from xgboost import XGBClassifier
+from lightgbm import LGBMClassifier
 
 from utils.json_utils import save_json
 
@@ -22,15 +23,18 @@ X_test, y_test = data_module.get_feature_dataset(data_module.test_indices)
 
 # Models
 models = {
+    # Basic Models
     "KNN": KNeighborsClassifier(),
     "MLP": MLPClassifier(hidden_layer_sizes=(64, 32), random_state=42),
-    "DecisionTree": DecisionTreeClassifier(random_state=42),
     "LogisticRegression": LogisticRegression(random_state=42),
     "SVM": SVC(probability=True, random_state=42),
     "NaiveBayes": GaussianNB(),
+    "DecisionTree": DecisionTreeClassifier(random_state=42),
+    # Ensemble Methods (Bagging and Boosting)
     "RandomForest": RandomForestClassifier(random_state=42),
     "GradientBoosting": GradientBoostingClassifier(random_state=42),
-    "XGBoost": XGBClassifier(random_state=42, verbosity=1),
+    "XGBoost": XGBClassifier(random_state=42, verbosity=-1),
+    "LightGBM": LGBMClassifier(random_state=42, verbosity=-1),
 }
 
 # Train and evaluate each model
