@@ -1,11 +1,12 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+if "CUDA_VISIBLE_DEVICES" not in os.environ:
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import argparse
 
 import torch
 from lightning.pytorch import Trainer
 from lightning.pytorch.callbacks.progress import TQDMProgressBar
-from lightning.pytorch.callbacks import ModelCheckpoint, EarlyStopping
+from lightning.pytorch.callbacks import ModelCheckpoint
 from lightning.pytorch.loggers import TensorBoardLogger
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import LoraConfig, get_peft_model
@@ -79,8 +80,8 @@ if __name__ == "__main__":
         lora_config = LoraConfig(
             inference_mode=False,
             r=8,
-            lora_alpha=32,
-            lora_dropout=0.1,
+            lora_alpha=16,
+            lora_dropout=0.05,
             target_modules="all-linear",
         )
     
@@ -100,6 +101,8 @@ if __name__ == "__main__":
             args.experiment_name = "snap/without_multi_head_self_attn"
         else:
             args.experiment_name = "snap/full_model"
+        
+        # Set up the model
         config.lora_config = lora_config
         base_model = get_peft_model(base_model, lora_config)
         model = SNAP(

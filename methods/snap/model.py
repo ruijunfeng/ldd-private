@@ -24,6 +24,9 @@ class SNAP(nn.Module):
             use_multi_head_self_attn=config.use_multi_head_self_attn,
             num_features=config.num_features,
             embed_dim=self.word_embeddings.weight.shape[1],
+            head_dim=config.head_dim,
+            attention_bias=config.attention_bias,
+            attention_dropout=config.attention_dropout,
         )
     
     def forward(

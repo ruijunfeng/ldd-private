@@ -15,3 +15,15 @@ class SNAPConfig(CLSConfig):
         default=23,
         metadata={"help": "The number of features in the dataset used for numerical embeddings."},
     )
+    head_dim: int = field(
+        default=128,
+        metadata={"help": "The dimension of each attention head in the multi-head self-attention."},
+    )
+    attention_bias: bool = field(
+        default=False,
+        metadata={"help": "Whether to include bias terms in the projection layer of the multi-head self-attention."},
+    )
+    attention_dropout: float = field(
+        default=0.05,
+        metadata={"help": "Dropout rate for attention layers in the multi-head self-attention."},
+    )
