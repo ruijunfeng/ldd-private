@@ -104,11 +104,13 @@ class SFTModule(LightningModule):
     
     def on_save_checkpoint(self, checkpoint):
         # Get the default state_dict
-        state_dict = self.state_dict()
+        state_dict = checkpoint["state_dict"]
         # Remove base_model from the state_dict as peft don't change the base_model
-        keys_to_remove = [key for key in state_dict if "lora" not in key and "prompt_encoder" not in key and "score" not in key]
+        # Don't use self.named_parameters() and requires_grad to filter, as it does not contain all parameters (e.g. Buffer)
+        keys_to_remove = [key for key in state_dict if "lora" not in key and "prompt_encoder" not in key]
         for key in keys_to_remove:
             del state_dict[key]
+        checkpoint["state_dict"] = state_dict
         # Remove 'model.' prefix in state_dict keys before saving
         checkpoint["state_dict"] = {
             k[len("model."):]: v for k, v in state_dict.items() if k.startswith("model.")
