@@ -46,8 +46,8 @@ if __name__ == "__main__":
         help="Whether to use numerical embeddings in the prompt encoder (snap).",
     )
     parser.add_argument(
-        "--use_multi_head_self_attn", action="store_false",
-        help="Whether to use multi-head self-attention in the prompt encoder (snap).",
+        "--use_numerical_profiling", action="store_false",
+        help="Whether to use numerical profiling in the prompt encoder (snap).",
     )
     
     # Parse the arguments
@@ -96,9 +96,9 @@ if __name__ == "__main__":
         if not args.use_numerical_embedding:
             config.use_numerical_embedding = False
             args.experiment_name = "snap/without_numerical_embedding"
-        elif not args.use_multi_head_self_attn:
-            config.use_multi_head_self_attn = False
-            args.experiment_name = "snap/without_multi_head_self_attn"
+        elif not args.use_numerical_profiling:
+            config.use_numerical_profiling = False
+            args.experiment_name = "snap/without_numerical_profiling"
         else:
             args.experiment_name = "snap/full_model"
         

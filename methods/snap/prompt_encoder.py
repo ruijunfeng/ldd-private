@@ -8,17 +8,20 @@ class NumericalEmbedding(nn.Module):
         self.num_features = num_features
         self.embed_dim = embed_dim
         
-        # 1. Use Conv1d with groups=num_features to achieve per-feature linear projection
+        # Use Conv1d with groups=num_features to achieve per-feature linear projection
         # Equivalent to having separate Linear layers for each feature, but more efficient
         # Like input with shape [batch, num_features, 1], it got groups * [1, embed_dim] of non-shared weight matrix
-        self.numerical_embedding = nn.Conv1d(
+        self.scalar_projection = nn.Conv1d(
             in_channels=num_features,
             out_channels=num_features * embed_dim,
             kernel_size=1,
             groups=num_features,
         )
         
-        # 2. Normalization
+        # Use a linear layer for feature projection
+        self.feature_projection = nn.Linear(embed_dim, embed_dim)
+        
+        # Normalization
         # The key is to do Norm over the embedding dimension
         # Ensuring that the embedding vectors for each feature have controlled magnitude, independent of batch distribution
         self.normalization = nn.LayerNorm(embed_dim)
@@ -33,9 +36,9 @@ class NumericalEmbedding(nn.Module):
         # Even the input is 100 million, after log it's about 20, which neural networks can handle
         x = torch.sign(x) * torch.log1p(torch.abs(x))
         
-        # --- Step 2: Numerical Embedding ---
+        # --- Step 2: Scalar Projection ---
         x = x.unsqueeze(-1) # [batch, num_features] -> [batch, num_features, 1]
-        x = self.numerical_embedding(x) # -> [batch, num_features * embed_dim, 1]
+        x = self.scalar_projection(x) # -> [batch, num_features * embed_dim, 1]
         x = x.view(-1, self.num_features, self.embed_dim) # -> [batch, num_features, embed_dim]
         
         # --- Step 3: Normalization ---
@@ -43,6 +46,9 @@ class NumericalEmbedding(nn.Module):
         # This ensures the normalization is per-feature embedding, not across features
         # Even batch size is 1, it still works correctly
         x = self.normalization(x)
+        
+        # --- Step 4: Feature Projection ---
+        x = self.feature_projection(x)
         
         return x
 
@@ -146,16 +152,16 @@ class NumericalPromptEncoder(nn.Module):
                 num_features=num_features,
                 embed_dim=embed_dim,
             )
-        # whether to use multi-head self-attention
+        # whether to use multi-head self-attention for numerical profiling
         if use_multi_head_self_attn:
-            self.multi_head_self_attention = MultiHeadSelfAttention(
+            self.numerical_profiling = MultiHeadSelfAttention(
                 hidden_dim=embed_dim,
                 head_dim=head_dim,
                 attention_bias=attention_bias,
                 attention_dropout=attention_dropout,
             )
         else:
-            self.multi_head_self_attention = lambda x: (x, None)
+            self.numerical_profiling = lambda x: (x, None)
     
     def forward(self, x):
         # x: [batch_size, num_features]
@@ -163,8 +169,8 @@ class NumericalPromptEncoder(nn.Module):
         # 1. Numerical Embedding
         x = self.numerical_embedding(x) # [batch_size, num_features, embed_dim]
         
-        # 2. Multi-Head Self-Attention
-        x, attn_weights = self.multi_head_self_attention(x) # [batch_size, num_features, embed_dim]
+        # 2. Numerical Profiling
+        x, attn_weights = self.numerical_profiling(x) # [batch_size, num_features, embed_dim]
         
         return x
 
@@ -172,12 +178,12 @@ class NumericalPromptEncoder(nn.Module):
 if __name__ == "__main__":
     # Numerical Embedding Test
     model = NumericalEmbedding(num_features=5, embed_dim=16)
-
+    
     # One sample with numerical features in different magnitudes
     input_one = torch.tensor([[100000.0, 0.05, -500.0, 3.0, 0.0]])
-
+    
     output = model(input_one)
-
+    
     print("Output shape:", output.shape) # [1, 5, 16]
     print("Contain NaN?", torch.isnan(output).any().item())
     print("Mean (approx 0):", output.mean().item()) # LayerNorm ensure the mean is around 0
